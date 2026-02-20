@@ -1,35 +1,62 @@
-# Maven Java Project with Jenkins & SonarQube CI/CD
+# Simple Java Maven App CI/CD Pipeline
 
-This repository contains a sample Java application managed by a Maven build system and a fully automated Jenkins Pipeline.
-
-## 🚀 Pipeline Features
-- **Build**: Compiles the source code and packages it into a JAR file.
-- **Unit Testing**: Executes JUnit tests and publishes results to Jenkins.
-- **Static Code Analysis**: Integrates with [SonarQube](https://www.sonarqube.org) to detect bugs, vulnerabilities, and code smells.
-- **Quality Gate**: Automatically fails the build if the code does not meet pre-defined quality standards.
-- **Delivery**: Executes deployment scripts upon successful validation.
+This project is a Java application built with Maven and integrated with Jenkins and SonarQube for automated testing and code quality analysis.
 
 ## 🛠 Prerequisites
 
-### 1. Jenkins Configuration
-*   **Plugins**: Install the [SonarQube Scanner for Jenkins](https://plugins.jenkins.io) plugin.
-*   **SonarQube Server**: Configure your server under `Manage Jenkins` > `System`. Ensure the name matches `'SonarQube'` as used in the Jenkinsfile.
-*   **Webhook**: In SonarQube, go to `Administration` > `Configuration` > `Webhooks` and add a webhook pointing to `YOUR_JENKINS_URL/sonarqube-webhook/` to enable the Quality Gate wait step.
+1.  **Jenkins Server**: Installed and running.
+2.  **SonarQube Server**: Installed and running (Local or Cloud).
+3.  **Java & Maven**: Installed on the Jenkins node (if not using Docker).
 
-### 2. Docker
-The pipeline uses a Docker agent (`maven:3-alpine`) to ensure a consistent build environment. Ensure the Jenkins node has Docker installed and the Jenkins user has permission to run Docker commands.
+## 🚀 Setup Instructions
 
-## 📁 Project Structure
-- `src/`: Java source code.
-- `Jenkinsfile`: Defines the CI/CD pipeline stages.
-- `jenkins/scripts/`: Contains delivery/deployment automation scripts.
-- `pom.xml`: Maven project configuration.
+### Step 1: Install Jenkins Plugins
+1.  Navigate to **Manage Jenkins** > **Manage Plugins**.
+2.  Install the following plugins:
+    *   **SonarQube Scanner for Jenkins**
+    *   **Pipeline**
+    *   **Git**
 
-## 🚦 How to Run
-1. Create a new **Pipeline** job in Jenkins.
-2. Under **Pipeline Script from SCM**, select **Git** and provide this repository URL.
-3. Ensure the script path is set to `Jenkinsfile`.
-4. Click **Build Now**.
+### Step 2: Generate SonarQube Token
+1.  Log in to **SonarQube**.
+2.  Go to **My Account** (top right) > **Security**.
+3.  Under **Tokens**, enter a name (e.g., `jenkins-token`) and click **Generate**.
+4.  **Important**: Copy the token immediately; you won't see it again.
+
+### Step 3: Configure Credentials in Jenkins
+1.  Go to **Manage Jenkins** > **Credentials** > **System** > **Global credentials**.
+2.  Click **Add Credentials**:
+    *   **Kind**: Secret text
+    *   **Secret**: [Paste your SonarQube Token]
+    *   **ID**: `sonar-token`
+    *   **Description**: SonarQube Authentication Token
+
+### Step 4: Configure SonarQube Server in Jenkins
+1.  Go to **Manage Jenkins** > **System** (or **Configure System**).
+2.  Find **SonarQube servers** and click **Add SonarQube**.
+3.  **Name**: `SonarQube` (This must match the name in your Jenkinsfile).
+4.  **Server URL**: `http://<your-sonarqube-url>:9000`.
+5.  **Server authentication token**: Select `sonar-token` from the dropdown.
+
+### Step 5: Configure Build Tools (Non-Docker Setup)
+1.  Go to **Manage Jenkins** > **Tools**.
+2.  **JDK**: Add JDK and name it `Java 11`.
+3.  **Maven**: Add Maven and name it `Maven 3.x`.
+4.  **SonarQube Scanner**: Under **SonarQube Scanner installations**, click **Add SonarQube Scanner**, name it `SonarScanner`, and check **Install automatically**.
+
+### Step 6: Configure SonarQube Webhook (For Quality Gate)
+1.  In **SonarQube**, go to **Administration** > **Configuration** > **Webhooks**.
+2.  Click **Create**:
+    *   **Name**: `Jenkins Webhook`
+    *   **URL**: `http://<YOUR_JENKINS_URL>/sonarqube-webhook/` (The trailing slash is required).
+
+## 🏗 Pipeline Execution
+The pipeline is defined in the `Jenkinsfile`. It will:
+1.  Build the project using Maven.
+2.  Run Unit Tests.
+3.  Execute SonarQube analysis.
+4.  Wait for the Quality Gate result.
+5.  Deliver the application if all checks pass.
 
 
 This repository is for the
