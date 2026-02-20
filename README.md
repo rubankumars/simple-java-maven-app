@@ -50,6 +50,37 @@ This project is a Java application built with Maven and integrated with Jenkins 
     *   **Name**: `Jenkins Webhook`
     *   **URL**: `http://<YOUR_JENKINS_URL>/sonarqube-webhook/` (The trailing slash is required).
 
+### Step 7: Create and Configure the Jenkins Job
+1. On the Jenkins Dashboard, click **New Item**.
+2. Enter name `simple-java-maven-app` and select **Pipeline**, then click **OK**.
+3. Scroll down to the **Pipeline** section and configure:
+    * **Definition**: `Pipeline script from SCM`
+    * **SCM**: `Git`
+    * **Repository URL**: `https://github.com`
+    * **Branch Specifier**: `*/master`
+    * **Script Path**: `jenkins/Jenkinsfile` <-- *(Crucial: Since your file is inside the jenkins folder)*
+4. Click **Save**.
+
+### Step 8: Run the Pipeline
+1. Click **Build Now** on the left sidebar.
+2. **Monitor the Stages**:
+    * **Build**: Compiles the app.
+    * **Test**: Runs JUnit tests and records results.
+    * **SonarQube Analysis**: Sends code data to your SonarQube server.
+    * **Quality Gate**: Jenkins will pause and wait for a "Go/No-Go" signal from SonarQube via the Webhook.
+    * **Deliver**: Executes the delivery script located at `jenkins/scripts/deliver.sh`.
+
+## 📊 Viewing Results
+* **Test Reports**: After a build, click on the **Latest Test Result** in Jenkins to see passing/failing tests.
+* **Sonar Dashboard**: A SonarQube icon will appear on the Jenkins Job page; click it to see detailed code smells, bugs, and security vulnerabilities.
+* **Code Coverage**: Detailed line-by-line coverage is available within the SonarQube UI under the "Measures" tab.
+
+## 📁 Repository Structure
+* `src/`: Main Java source code and tests.
+* `jenkins/Jenkinsfile`: The CI/CD pipeline definition (Non-Docker version).
+* `jenkins/scripts/`: Automation scripts for deployment/delivery.
+* `pom.xml`: Maven configuration including JaCoCo and SonarScanner plugins.
+
 ## 🏗 Pipeline Execution
 The pipeline is defined in the `Jenkinsfile`. It will:
 1.  Build the project using Maven.
@@ -57,7 +88,6 @@ The pipeline is defined in the `Jenkinsfile`. It will:
 3.  Execute SonarQube analysis.
 4.  Wait for the Quality Gate result.
 5.  Deliver the application if all checks pass.
-
 
 This repository is for the
 [Build a Java app with Maven](https://jenkins.io/doc/tutorials/build-a-java-app-with-maven/)
